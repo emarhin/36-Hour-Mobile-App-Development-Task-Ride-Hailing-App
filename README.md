@@ -1,4 +1,4 @@
-# 🔐 Firebase Authentication with Expo & AsyncStorage
+# 36-Hour-Mobile-App-Development-Task-Ride-Hailing-App
 
 A complete Firebase Email/Password Authentication flow in an Expo React Native app, featuring:
 
