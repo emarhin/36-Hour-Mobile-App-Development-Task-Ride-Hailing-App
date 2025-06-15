@@ -1,120 +1,36 @@
 # 36-Hour-Mobile-App-Development-Task-Ride-Hailing-App
 
-A complete Firebase Email/Password Authentication flow in an Expo React Native app, featuring:
+## 🚀 How to Run the Expo App
 
-- ✅ Sign Up & Login with Firebase
-- 👤 Basic User Profile (Name, Email, Phone)
-- 🔁 Persistent login with `AsyncStorage`
-- 🧼 Form validation & error handling
+1. **Prerequisites**:
 
----
+   - Node.js (v18+ recommended)
+   - Expo CLI installed globally (`npm install -g expo-cli`)
+   - Android/iOS simulator or physical device with [Expo Go](https://expo.dev/client) installed
 
-## 🛠 Tech Stack
+2. **Setup**:
 
-- [Expo](https://expo.dev/)
-- Firebase Authentication
-- React Native + TypeScript
-- `@react-native-async-storage/async-storage`
-- (Optional) `react-hook-form` / `yup` for validation
+   ```bash
+   # Clone repository
+   git clone https://github.com/emarhin/36-Hour-Mobile-App-Development-Task-Ride-Hailing-App.git
+   cd project-repo
 
----
+   # Install dependencies
+   npm install or bun install or yarn install
 
-## 🚀 Features
 
-### 🔐 Authentication
+   ```
 
-- Email & Password Sign Up / Login
-- Secure session management
-- Firebase backend integration
+# Start development server
 
-### 👤 User Profile
+npx expo start
 
-- Displays:
-  - Name
-  - Email
-  - Phone Number
+# Then choose an option:
 
-### 🔁 Persistent Login
+# a. Scan QR code with Expo Go app (physical device)
 
-Uses Firebase Auth with `AsyncStorage` for login session persistence:
+# b. Press 'a' for Android emulator
 
-```ts
-import { initializeApp } from "firebase/app";
-import { initializeAuth, getReactNativePersistence } from "firebase/auth";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { firebaseConfig } from "./firebaseConfig";
+# c. Press 'i' for iOS simulator
 
-const app = initializeApp(firebaseConfig);
-
-const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage),
-});
-```
-
-2. 🗺️ Map Integration & Location Services
-   Interactive Map with user's current location
-
-Permissions Handling using expo-location
-
-Address Search (UI only)
-
-Simulated Route Display between pickup and destination
-
-Accurate GPS Centering on user's position
-
-⚠️ Note to Reviewer:
-Since Google Maps API key was not provided, route and address search were simulated using custom logic and mock data. This allows the app to function for demo purposes but is not ideal for production.
-
-3. 🚖 Ride Booking Flow
-   Pickup & Destination Selection via search or tapping map
-
-Fare Estimation: Simulates distance, fare, and ETA
-
-Vehicle Selection: Economy, Premium, SUV options
-
-Booking Confirmation step with trip summary
-
-Booking Status Updates:
-
-Searching
-
-Driver Assigned
-
-En Route
-
-Arrived
-
-In Progress
-
-Completed
-
-4. 👨‍✈️ Driver Simulation
-   Mock Driver Assignment after 2–5 seconds delay
-
-Driver Info: Name, vehicle, rating, and image
-
-Live Driver Tracking with simulated location updates
-
-Mock Communication UI (Phone & Message buttons)
-
-5. 📦 Trip Management
-   Active Trip View: Displays current trip info & status
-
-Trip History: Completed trip list with summary
-
-Trip Details View: Fare, duration, route breakdown
-
-Cancel Trip Option: With confirmation prompt
-
-📦 Tech Stack
-React Native with Expo
-
-Firebase Authentication
-
-@react-native-async-storage/async-storage
-
-React Native Maps
-
-Expo Location
-
-Optional: yup / react-hook-form for validation
+# d. Press 'w' for web browser
