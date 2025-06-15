@@ -1,50 +1,120 @@
-# Welcome to your Expo app 👋
+# 🔐 Firebase Authentication with Expo & AsyncStorage
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A complete Firebase Email/Password Authentication flow in an Expo React Native app, featuring:
 
-## Get started
+- ✅ Sign Up & Login with Firebase
+- 👤 Basic User Profile (Name, Email, Phone)
+- 🔁 Persistent login with `AsyncStorage`
+- 🧼 Form validation & error handling
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## 🛠 Tech Stack
 
-2. Start the app
+- [Expo](https://expo.dev/)
+- Firebase Authentication
+- React Native + TypeScript
+- `@react-native-async-storage/async-storage`
+- (Optional) `react-hook-form` / `yup` for validation
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## 🚀 Features
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### 🔐 Authentication
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- Email & Password Sign Up / Login
+- Secure session management
+- Firebase backend integration
 
-## Get a fresh project
+### 👤 User Profile
 
-When you're ready, run:
+- Displays:
+  - Name
+  - Email
+  - Phone Number
 
-```bash
-npm run reset-project
+### 🔁 Persistent Login
+
+Uses Firebase Auth with `AsyncStorage` for login session persistence:
+
+```ts
+import { initializeApp } from "firebase/app";
+import { initializeAuth, getReactNativePersistence } from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { firebaseConfig } from "./firebaseConfig";
+
+const app = initializeApp(firebaseConfig);
+
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage),
+});
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+2. 🗺️ Map Integration & Location Services
+   Interactive Map with user's current location
 
-## Learn more
+Permissions Handling using expo-location
 
-To learn more about developing your project with Expo, look at the following resources:
+Address Search (UI only)
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Simulated Route Display between pickup and destination
 
-## Join the community
+Accurate GPS Centering on user's position
 
-Join our community of developers creating universal apps.
+⚠️ Note to Reviewer:
+Since Google Maps API key was not provided, route and address search were simulated using custom logic and mock data. This allows the app to function for demo purposes but is not ideal for production.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+3. 🚖 Ride Booking Flow
+   Pickup & Destination Selection via search or tapping map
+
+Fare Estimation: Simulates distance, fare, and ETA
+
+Vehicle Selection: Economy, Premium, SUV options
+
+Booking Confirmation step with trip summary
+
+Booking Status Updates:
+
+Searching
+
+Driver Assigned
+
+En Route
+
+Arrived
+
+In Progress
+
+Completed
+
+4. 👨‍✈️ Driver Simulation
+   Mock Driver Assignment after 2–5 seconds delay
+
+Driver Info: Name, vehicle, rating, and image
+
+Live Driver Tracking with simulated location updates
+
+Mock Communication UI (Phone & Message buttons)
+
+5. 📦 Trip Management
+   Active Trip View: Displays current trip info & status
+
+Trip History: Completed trip list with summary
+
+Trip Details View: Fare, duration, route breakdown
+
+Cancel Trip Option: With confirmation prompt
+
+📦 Tech Stack
+React Native with Expo
+
+Firebase Authentication
+
+@react-native-async-storage/async-storage
+
+React Native Maps
+
+Expo Location
+
+Optional: yup / react-hook-form for validation
