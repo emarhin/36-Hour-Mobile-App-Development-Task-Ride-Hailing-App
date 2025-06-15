@@ -12,8 +12,9 @@ const driverInfo = {
     licensePlate: "ABC-123",
   },
   location: {
-    latitude: 37.7749,
-    longitude: -122.4194,
+    latitude: 5.74521,
+    longitude: -0.20307,
+    address: "123 Main St, San Francisco, CA",
   },
   profileImage: "https://randomuser.me/api/portraits/women/68.jpg",
 };

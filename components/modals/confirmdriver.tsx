@@ -1,5 +1,5 @@
-import { images } from "@/assets/constants";
 import driverInfo from "@/data/driverinfo";
+import { useDriverStore, useLocationStore } from "@/store";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -12,60 +12,91 @@ import {
   View,
 } from "react-native";
 
+type BookingStatus =
+  | "Searching"
+  | "DriverAssigned"
+  | "EnRoute"
+  | "Arrived"
+  | "InProgress"
+  | "Completed";
+
 const DriverConfirmationScreen = ({ openModal }) => {
+  const { setDriverComing, distanceRemaingToReachUser } = useDriverStore();
+
   // Simulation state
-  const [distance, setDistance] = useState(1.5); // in km
-  const [eta, setEta] = useState(5); // in minutes
-  const [driverPosition, setDriverPosition] = useState(0.1); // 0-1 position
-  const [isArrived, setIsArrived] = useState(false);
+  const [distance, setDistance] = useState(1.5);
+  const [eta, setEta] = useState(5);
+  const [driverPosition, setDriverPosition] = useState(0.1);
   const [showCancelModal, setShowCancelModal] = useState(false);
-  const [isCancelled, setIsCancelled] = useState(false);
   const [isSimulating, setIsSimulating] = useState(true);
+  const { reset } = useLocationStore();
+
+  // Booking status state
+  const [bookingStatus, setBookingStatus] =
+    useState<BookingStatus>("Searching");
 
   // Animation values
   const progressAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  // Simulate driver movement
+  // Simulate booking flow
   useEffect(() => {
-    if (!isSimulating || isArrived || isCancelled) return;
+    if (!isSimulating) return;
 
-    const interval = setInterval(() => {
-      // Update distance and ETA
-      const newDistance = Math.max(0, distance - 0.1);
-      const newEta = Math.max(0, eta - 0.3);
+    // Initial searching state
+    const searchTimer = setTimeout(() => {
+      setBookingStatus("DriverAssigned");
 
-      setDistance(newDistance);
-      setEta(newEta);
-      setDriverPosition(1 - newDistance / 1.5);
+      // Driver preparation time
+      const preparationTimer = setTimeout(() => {
+        setBookingStatus("EnRoute");
+      }, 3000);
 
-      // Check if driver arrived
-      if (newDistance <= 0.1 && !isArrived) {
-        setIsArrived(true);
-        clearInterval(interval);
+      return () => clearTimeout(preparationTimer);
+    }, 2000);
 
-        // Trigger arrival animation
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 1000,
-          useNativeDriver: true,
-        }).start();
-      }
+    return () => clearTimeout(searchTimer);
+  }, [isSimulating]);
+
+  // Simulate driver movement during EnRoute state
+  useEffect(() => {
+    if (bookingStatus !== "EnRoute" || !isSimulating) return;
+
+    const movementInterval = setInterval(() => {
+      setDistance((prevDistance) => {
+        const newDistance = Math.max(0, prevDistance - 0.1);
+        setEta((prevEta) => Math.max(0, prevEta - 0.3));
+        setDriverPosition(1 - newDistance / 1.5);
+
+        if (newDistance <= 0.1) {
+          clearInterval(movementInterval);
+          setBookingStatus("Arrived");
+
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: distanceRemaingToReachUser,
+            useNativeDriver: true,
+          }).start();
+        }
+
+        return newDistance;
+      });
     }, 1000);
 
-    return () => clearInterval(interval);
-  }, [distance, eta, isArrived, isSimulating, isCancelled]);
+    return () => clearInterval(movementInterval);
+  }, [bookingStatus, isSimulating]);
 
   // Animate progress bar
   useEffect(() => {
-    if (isCancelled) return;
+    if (bookingStatus !== "EnRoute" && bookingStatus !== "Arrived") return;
+    setDriverComing(true);
 
     Animated.timing(progressAnim, {
       toValue: driverPosition,
-      duration: 1000,
+      duration: distanceRemaingToReachUser,
       useNativeDriver: false,
     }).start();
-  }, [driverPosition]);
+  }, [driverPosition, bookingStatus]);
 
   // Format time display
   const formatTime = (minutes: number) => {
@@ -75,34 +106,60 @@ const DriverConfirmationScreen = ({ openModal }) => {
 
   // Handle trip cancellation
   const handleCancelTrip = () => {
-    console.log("Trip cancelled");
-    setIsCancelled(true);
+    setBookingStatus("Completed");
     setIsSimulating(false);
     setShowCancelModal(false);
-
-    // Reset animation values
     Animated.timing(progressAnim).stop();
     fadeAnim.setValue(0);
   };
 
+  // Handle trip actions
+  const handleStartTrip = () => setBookingStatus("InProgress");
+  const handleCompleteTrip = () => setBookingStatus("Completed");
+
   // Reset the simulation
   const resetSimulation = () => {
-    setDistance(1.5);
-    setEta(5);
-    setDriverPosition(0.1);
-    setIsArrived(false);
-    setIsCancelled(false);
-    setIsSimulating(true);
-    progressAnim.setValue(0);
+    reset();
+    openModal();
+  };
+
+  // Render status indicator
+  const renderStatusIndicator = () => {
+    const statusConfig: Record<BookingStatus, { color: string; text: string }> =
+      {
+        Searching: { color: "#FFA500", text: "Finding a driver..." },
+        DriverAssigned: { color: "#1E90FF", text: "Driver assigned" },
+        EnRoute: { color: "#32CD32", text: "Driver en route" },
+        Arrived: { color: "#228B22", text: "Driver arrived" },
+        InProgress: { color: "#8A2BE2", text: "Trip in progress" },
+        Completed: { color: "#808080", text: "Trip completed" },
+      };
+
+    const { color, text } = statusConfig[bookingStatus];
+
+    return (
+      <View style={[styles.statusContainer, { backgroundColor: color }]}>
+        <Text style={styles.statusText}>{text}</Text>
+      </View>
+    );
   };
 
   return (
     <View style={styles.container}>
-      {isCancelled ? (
+      {/* Status Indicator */}
+      {renderStatusIndicator()}
+
+      {bookingStatus === "Completed" ? (
         <View style={styles.cancelledContainer}>
-          <Text style={styles.cancelledTitle}>Trip Cancelled</Text>
+          <Text style={styles.cancelledTitle}>
+            {bookingStatus === "Completed"
+              ? "Trip Completed"
+              : "Trip Cancelled"}
+          </Text>
           <Text style={styles.cancelledText}>
-            Your trip has been successfully cancelled.
+            {bookingStatus === "Completed"
+              ? "Your trip has been successfully completed."
+              : "Your trip has been successfully cancelled."}
           </Text>
           <TouchableOpacity
             style={styles.resetButton}
@@ -113,94 +170,110 @@ const DriverConfirmationScreen = ({ openModal }) => {
         </View>
       ) : (
         <>
-          <Text style={styles.title}>Driver is on the way!</Text>
+          <Text style={styles.title}>
+            {bookingStatus === "Searching"
+              ? "Finding your driver..."
+              : bookingStatus === "DriverAssigned"
+                ? "Driver is preparing!"
+                : bookingStatus === "EnRoute"
+                  ? "Driver is on the way!"
+                  : bookingStatus === "Arrived"
+                    ? "Driver has arrived!"
+                    : "Trip in progress"}
+          </Text>
 
           {/* Progress visualization */}
-          <View style={styles.routeContainer}>
-            <View style={styles.locationDot} />
-            <View style={styles.routeLine}>
-              <Animated.View
-                style={[
-                  styles.driverPosition,
-                  { left: `${driverPosition * 100}%` },
-                ]}
-              >
-                <Image source={images.carIcon} style={styles.carIcon} />
-              </Animated.View>
-            </View>
-            <View style={[styles.locationDot, styles.destinationDot]} />
-          </View>
-
-          {/* Progress bar */}
-          <View style={styles.progressContainer}>
-            <Text style={styles.progressText}>Driver position</Text>
-            <View style={styles.progressBar}>
-              <Animated.View
-                style={[
-                  styles.progressFill,
-                  {
-                    width: progressAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: ["0%", "100%"],
-                    }),
-                  },
-                ]}
-              />
-            </View>
-          </View>
+          {(bookingStatus === "EnRoute" || bookingStatus === "Arrived") && (
+            <>
+              <View style={styles.progressContainer}>
+                <Text style={styles.progressText}>Driver position</Text>
+                <View style={styles.progressBar}>
+                  <Animated.View
+                    style={[
+                      styles.progressFill,
+                      {
+                        width: progressAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ["0%", "100%"],
+                        }),
+                      },
+                    ]}
+                  />
+                </View>
+              </View>
+            </>
+          )}
 
           {/* Driver information */}
-          <View style={styles.driverCard}>
-            <Image
-              source={{ uri: driverInfo?.profileImage }}
-              style={styles.driverImage}
-            />
-            <View style={styles.driverInfo}>
-              <Text style={styles.driverName}>{driverInfo?.name}</Text>
-              <Text style={styles.driverRating}>
-                ★ {driverInfo?.rating} ({driverInfo?.totalTrips} trips)
-              </Text>
-              <Text style={styles.vehicleText}>
-                {driverInfo?.vehicle.color} {driverInfo?.vehicle.make}{" "}
-                {driverInfo?.vehicle.model} • {driverInfo?.vehicle.licensePlate}
-              </Text>
+          {bookingStatus !== "Searching" && (
+            <View style={styles.driverCard}>
+              <Image
+                source={{ uri: driverInfo?.profileImage }}
+                style={styles.driverImage}
+              />
+              <View style={styles.driverInfo}>
+                <Text style={styles.driverName}>{driverInfo?.name}</Text>
+                <Text style={styles.driverRating}>
+                  ★ {driverInfo?.rating} ({driverInfo?.totalTrips} trips)
+                </Text>
+                <Text style={styles.vehicleText}>
+                  {driverInfo?.vehicle.color} {driverInfo?.vehicle.make}{" "}
+                  {driverInfo?.vehicle.model} •{" "}
+                  {driverInfo?.vehicle.licensePlate}
+                </Text>
+              </View>
             </View>
-          </View>
+          )}
 
           {/* Status information */}
-          <View style={styles.infoContainer}>
-            <View style={styles.infoBox}>
-              <Text style={styles.infoLabel}>Distance</Text>
-              <Text style={styles.infoValue}>{distance?.toFixed(1)} km</Text>
+          {(bookingStatus === "EnRoute" || bookingStatus === "Arrived") && (
+            <View style={styles.infoContainer}>
+              <View style={styles.infoBox}>
+                <Text style={styles.infoLabel}>Distance</Text>
+                <Text style={styles.infoValue}>{distance?.toFixed(1)} km</Text>
+              </View>
+              <View style={styles.infoBox}>
+                <Text style={styles.infoLabel}>ETA</Text>
+                <Text style={styles.infoValue}>{formatTime(eta)}</Text>
+              </View>
             </View>
+          )}
 
-            <View style={styles.infoBox}>
-              <Text style={styles.infoLabel}>ETA</Text>
-              <Text style={styles.infoValue}>{formatTime(eta)}</Text>
-            </View>
-          </View>
-
-          {/* Arrival notification */}
-          {isArrived && (
+          {/* Action buttons */}
+          {bookingStatus === "Arrived" && (
             <Animated.View
               style={[styles.arrivalContainer, { opacity: fadeAnim }]}
             >
-              <Text style={styles.arrivalText}>Driver has arrived!</Text>
+              <TouchableOpacity
+                style={styles.startTripButton}
+                onPress={handleStartTrip}
+              >
+                <Text style={styles.startTripButtonText}>Start Trip</Text>
+              </TouchableOpacity>
             </Animated.View>
           )}
 
-          <Text style={styles.note}>
-            Look for a {driverInfo?.vehicle.color} car with license plate{" "}
-            {driverInfo?.vehicle.licensePlate}
-          </Text>
+          {bookingStatus === "InProgress" && (
+            <View style={styles.inProgressContainer}>
+              <Text style={styles.inProgressText}>Your trip is ongoing</Text>
+              <TouchableOpacity
+                style={styles.completeButton}
+                onPress={handleCompleteTrip}
+              >
+                <Text style={styles.completeButtonText}>Complete Trip</Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
           {/* Cancel Trip Button */}
-          <TouchableOpacity
-            style={styles.cancelButton}
-            onPress={() => setShowCancelModal(true)}
-          >
-            <Text style={styles.cancelButtonText}>Cancel Trip</Text>
-          </TouchableOpacity>
+          {bookingStatus !== "Completed" && bookingStatus !== "InProgress" && (
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setShowCancelModal(true)}
+            >
+              <Text style={styles.cancelButtonText}>Cancel Trip</Text>
+            </TouchableOpacity>
+          )}
         </>
       )}
 
@@ -224,16 +297,7 @@ const DriverConfirmationScreen = ({ openModal }) => {
                 style={[styles.modalButton, styles.cancelButtonModal]}
                 onPress={() => setShowCancelModal(false)}
               >
-                <Text
-                  style={
-                    (styles.modalButtonText,
-                    {
-                      color: "black",
-                    })
-                  }
-                >
-                  Continue Trip
-                </Text>
+                <Text style={{ color: "black" }}>Continue Trip</Text>
               </Pressable>
 
               <Pressable
@@ -256,6 +320,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 20,
     justifyContent: "space-between",
+  },
+  statusContainer: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    alignSelf: "center",
+    marginBottom: 15,
+  },
+  statusText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
   },
   title: {
     fontSize: 24,
@@ -403,7 +479,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
-  // Modal styles
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -454,7 +529,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "white",
   },
-  // Cancelled state styles
   cancelledContainer: {
     flex: 1,
     justifyContent: "center",
@@ -482,6 +556,38 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   resetButtonText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  startTripButton: {
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  startTripButtonText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  inProgressContainer: {
+    alignItems: "center",
+    marginVertical: 20,
+  },
+  inProgressText: {
+    fontSize: 18,
+    marginBottom: 15,
+    color: "#333",
+  },
+  completeButton: {
+    backgroundColor: "#8A2BE2",
+    padding: 15,
+    borderRadius: 8,
+    minWidth: "60%",
+    alignItems: "center",
+  },
+  completeButtonText: {
     color: "white",
     fontSize: 18,
     fontWeight: "bold",

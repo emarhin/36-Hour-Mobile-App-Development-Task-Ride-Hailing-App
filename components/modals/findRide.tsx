@@ -18,12 +18,16 @@ const { height } = Dimensions.get("window");
 function BookingModal({ openModal }: any) {
   const [isBooking, setIsBooking] = useState(false);
 
+  const [pickup, setPickup] = useState("");
+  const [destination, setDestination] = useState("");
+
   const {
     userAddress,
     setUserLocation,
     setDestinationLocation,
     destinationLatitude,
     destinationLongitude,
+    destinationAddress,
   } = useLocationStore();
 
   const canBook =
@@ -80,7 +84,11 @@ function BookingModal({ openModal }: any) {
             <View style={styles.destinationDot} />
             <View style={styles.autocompleteContainer}>
               <Autocomplete
-                placeholder="Enter destination"
+                placeholder={
+                  destinationLatitude
+                    ? `${destinationAddress}`
+                    : "Enter destination"
+                }
                 setlocation={(location) => {
                   setDestinationLocation(location); // Must match store shape
                 }}
