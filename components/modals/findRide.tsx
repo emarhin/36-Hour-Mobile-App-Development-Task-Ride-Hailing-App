@@ -15,7 +15,7 @@ import {
 
 const { height } = Dimensions.get("window");
 
-function BookingModal() {
+function BookingModal({ openModal }: any) {
   const [isBooking, setIsBooking] = useState(false);
 
   const {
@@ -37,7 +37,7 @@ function BookingModal() {
     // Simulate booking logic
     setTimeout(() => {
       setIsBooking(false);
-      console.log("Ride confirmed!");
+      openModal();
     }, 500);
   }, [canBook]);
 

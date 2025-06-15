@@ -1,5 +1,4 @@
-import { images } from "@/assets/constants";
-import { MaterialIcons } from "@expo/vector-icons";
+import vehicleTypes from "@/data/vechilestypes";
 import React, { useState } from "react";
 import {
   Dimensions,
@@ -11,54 +10,15 @@ import {
   Text,
   View,
 } from "react-native";
-import Modal from "react-native-modal";
 
 const { height } = Dimensions.get("window");
 
-function VehicleTypeModal({ visible, onClose }: any) {
+function VehicleTypeModal() {
   const [selectedVehicle, setSelectedVehicle] = useState<string | null>(null);
-  const vehicleTypes = [
-    {
-      id: "economy",
-      name: "QuickRide Economy",
-      description: "Affordable rides for everyday trips",
-      baseFare: 2.5,
-      perKmRate: 1.2,
-      perMinuteRate: 0.25,
-      capacity: 4,
-      estimatedArrival: "3-5 min",
-      icon: images.carIcon, // Replace with your actual icon paths
-    },
-    {
-      id: "premium",
-      name: "QuickRide Premium",
-      description: "Comfortable rides with professional drivers",
-      baseFare: 4.0,
-      perKmRate: 2.0,
-      perMinuteRate: 0.4,
-      capacity: 4,
-      estimatedArrival: "2-4 min",
-      icon: images.carIcon,
-    },
-  ];
 
   return (
-    <Modal
-      isVisible={visible}
-      onBackdropPress={onClose}
-      backdropOpacity={0.5}
-      animationIn="fadeInUp"
-      animationOut="fadeOutDown"
-      style={styles.vehicleModal}
-    >
+    <>
       <View style={styles.vehicleModalContainer}>
-        <View style={styles.vehicleHeader}>
-          <Text style={styles.vehicleTitle}>Choose a ride</Text>
-          <Pressable onPress={onClose} style={styles.vehicleCloseButton}>
-            <MaterialIcons name="close" size={24} color="#000" />
-          </Pressable>
-        </View>
-
         <FlatList
           data={vehicleTypes}
           keyExtractor={(item) => item.id}
@@ -99,7 +59,7 @@ function VehicleTypeModal({ visible, onClose }: any) {
           onPress={() => {
             if (selectedVehicle) {
               console.log("Selected vehicle:", selectedVehicle);
-              onClose();
+              // onClose();
             }
           }}
           disabled={!selectedVehicle}
@@ -109,7 +69,7 @@ function VehicleTypeModal({ visible, onClose }: any) {
           </Text>
         </Pressable>
       </View>
-    </Modal>
+    </>
   );
 }
 
@@ -246,21 +206,13 @@ const styles = StyleSheet.create({
     paddingBottom: Platform.OS === "ios" ? 36 : 24,
     maxHeight: height * 0.85,
   },
-  vehicleHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 8,
-    marginBottom: 16,
-  },
+
   vehicleTitle: {
     fontSize: 24,
     fontWeight: "700",
     color: "#000",
   },
-  vehicleCloseButton: {
-    padding: 8,
-  },
+
   vehicleCard: {
     flexDirection: "row",
     alignItems: "center",
