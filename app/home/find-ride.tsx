@@ -82,6 +82,7 @@
 // export default App;
 
 import Map from "@/components/Map";
+import DriverConfirmationScreen from "@/components/modals/confirmdrivet";
 import FindRideModal from "@/components/modals/findRide";
 import VehicleTypeModal from "@/components/modals/Vehicles";
 import { SheetWrapper } from "@/components/sheetswrapper";
@@ -91,11 +92,11 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function App() {
   const sheetRef: any = useRef<BottomSheet>(null);
-  const [activeModal, setActiveModal] = useState<"find" | "vechile" | null>(
-    "find"
-  );
+  const [activeModal, setActiveModal] = useState<
+    "find" | "vechile" | "confirm_driver" | null | undefined | null
+  >("find");
 
-  const openModal = (name: "find" | "vechile") => {
+  const openModal = (name: "find" | "vechile" | "confirm_driver") => {
     setActiveModal(name);
     sheetRef.current?.present();
   };
@@ -104,7 +105,9 @@ export default function App() {
     activeModal === "find" ? (
       <FindRideModal openModal={() => openModal("vechile")} />
     ) : activeModal === "vechile" ? (
-      <VehicleTypeModal />
+      <VehicleTypeModal openModal={() => openModal("confirm_driver")} />
+    ) : activeModal === "confirm_driver" ? (
+      <DriverConfirmationScreen />
     ) : null;
 
   return (

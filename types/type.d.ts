@@ -10,20 +10,20 @@ declare interface Driver {
   rating: number;
 }
 
-declare interface MarkerData {
-  latitude: number;
-  longitude: number;
-  id: number;
-  title: string;
-  profile_image_url: string;
-  car_image_url: string;
-  car_seats: number;
-  rating: number;
-  first_name: string;
-  last_name: string;
-  time?: number;
-  price?: string;
-}
+// declare interface MarkerData {
+//   latitude: number;
+//   longitude: number;
+//   id: number;
+//   title: string;
+//   profile_image_url: string;
+//   car_image_url: string;
+//   car_seats: number;
+//   rating: number;
+//   first_name: string;
+//   last_name: string;
+//   time?: number;
+//   price?: string;
+// }
 
 declare interface MapProps {
   destinationLatitude?: number;
@@ -126,10 +126,12 @@ declare interface LocationStore {
 
 declare interface DriverStore {
   drivers: MarkerData[];
-  selectedDriver: number | null;
+  selectedDriver: number | null | any;
   setSelectedDriver: (driverId: number) => void;
   setDrivers: (drivers: MarkerData[]) => void;
   clearSelectedDriver: () => void;
+  vehiclePicked: string;
+  setVehiclePicked: (vehicle: string) => void;
 }
 
 declare interface DriverCardProps {

@@ -1,4 +1,5 @@
 import vehicleTypes from "@/data/vechilestypes";
+import { useDriverStore } from "@/store";
 import React, { useState } from "react";
 import {
   Dimensions,
@@ -13,7 +14,8 @@ import {
 
 const { height } = Dimensions.get("window");
 
-function VehicleTypeModal() {
+function VehicleTypeModal({ openModal }: any) {
+  const { vehiclePicked, setVehiclePicked } = useDriverStore();
   const [selectedVehicle, setSelectedVehicle] = useState<string | null>(null);
 
   return (
@@ -59,7 +61,10 @@ function VehicleTypeModal() {
           onPress={() => {
             if (selectedVehicle) {
               console.log("Selected vehicle:", selectedVehicle);
-              // onClose();
+
+              void setVehiclePicked(selectedVehicle);
+
+              openModal();
             }
           }}
           disabled={!selectedVehicle}
