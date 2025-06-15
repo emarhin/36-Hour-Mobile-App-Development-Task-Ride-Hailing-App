@@ -82,7 +82,7 @@
 // export default App;
 
 import Map from "@/components/Map";
-import DriverConfirmationScreen from "@/components/modals/confirmdrivet";
+import DriverConfirmationScreen from "@/components/modals/confirmdriver";
 import FindRideModal from "@/components/modals/findRide";
 import VehicleTypeModal from "@/components/modals/Vehicles";
 import { SheetWrapper } from "@/components/sheetswrapper";
@@ -107,7 +107,7 @@ export default function App() {
     ) : activeModal === "vechile" ? (
       <VehicleTypeModal openModal={() => openModal("confirm_driver")} />
     ) : activeModal === "confirm_driver" ? (
-      <DriverConfirmationScreen />
+      <DriverConfirmationScreen openModal={() => openModal("vechile")} />
     ) : null;
 
   return (

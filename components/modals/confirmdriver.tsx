@@ -12,7 +12,7 @@ import {
   View,
 } from "react-native";
 
-const DriverConfirmationScreen = () => {
+const DriverConfirmationScreen = ({ openModal }) => {
   // Simulation state
   const [distance, setDistance] = useState(1.5); // in km
   const [eta, setEta] = useState(5); // in minutes
@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
   cancelledTitle: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#e74c3c",
+    color: "black",
     marginBottom: 20,
   },
   cancelledText: {
@@ -475,7 +475,7 @@ const styles = StyleSheet.create({
     lineHeight: 26,
   },
   resetButton: {
-    backgroundColor: "#3498db",
+    backgroundColor: "black",
     borderRadius: 12,
     paddingVertical: 16,
     paddingHorizontal: 40,
