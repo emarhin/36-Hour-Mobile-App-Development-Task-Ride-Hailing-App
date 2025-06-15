@@ -224,7 +224,16 @@ const DriverConfirmationScreen = () => {
                 style={[styles.modalButton, styles.cancelButtonModal]}
                 onPress={() => setShowCancelModal(false)}
               >
-                <Text style={styles.modalButtonText}>Continue Trip</Text>
+                <Text
+                  style={
+                    (styles.modalButtonText,
+                    {
+                      color: "black",
+                    })
+                  }
+                >
+                  Continue Trip
+                </Text>
               </Pressable>
 
               <Pressable
@@ -438,11 +447,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
   },
   confirmCancelButton: {
-    backgroundColor: "#e74c3c",
+    backgroundColor: "black",
   },
   modalButtonText: {
     fontSize: 16,
     fontWeight: "600",
+    color: "white",
   },
   // Cancelled state styles
   cancelledContainer: {
