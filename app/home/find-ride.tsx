@@ -70,7 +70,6 @@ export default function App() {
               className="p-4 flex-row items-center"
               onPress={() => {
                 Logout();
-                route.replace("/(auth)");
               }}
             >
               <Text className="text-red-500 ml-2">Logout</Text>

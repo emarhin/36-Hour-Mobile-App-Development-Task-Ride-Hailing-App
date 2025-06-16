@@ -1,5 +1,6 @@
 // @ts-ignore
 import { auth } from "@/firebase.config";
+import { useRouter } from "expo-router";
 import {
   signOut as firebaseSignOut,
   onAuthStateChanged,
@@ -25,6 +26,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const route = useRouter();
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
@@ -36,6 +39,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const Logout = async () => {
     try {
       await firebaseSignOut(auth);
+
+      route.replace("/");
     } catch (e) {
       console.error("Sign-out error", e);
     }
